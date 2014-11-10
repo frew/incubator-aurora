@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-./gradlew distTar ./build-support/release/make-python-sdists
+./gradlew distTar
 ./pants src/main/python/apache/aurora/client/bin:aurora_client
 ./pants src/main/python/apache/aurora/client/cli:aurora2
 ./pants src/main/python/apache/aurora/client/bin:aurora_admin

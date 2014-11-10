@@ -1,0 +1,11 @@
+--- a/build-support/pants.venv/lib/python2.7/site-packages/pex/pex.py	2014-11-10 00:58:24.555130000 +0000
++++ b/build-support/pants.venv/lib/python2.7/site-packages/pex/pex.py	2014-11-10 00:58:04.383096271 +0000
+@@ -131,7 +131,7 @@
+     for path in user_site_distributions:
+       TRACER.log('Scrubbing from user site: %s' % path)
+ 
+-    scrub_paths = site_distributions | user_site_distributions
++    scrub_paths = site_distributions | user_site_distributions | OrderedSet([p for p in sys.path if 'site-packages' in p])
+     scrubbed_sys_path = list(OrderedSet(sys.path) - scrub_paths)
+     scrub_from_importer_cache = filter(
+       lambda key: any(key.startswith(path) for path in scrub_paths),

@@ -30,6 +30,9 @@ if ! [ -f "$HERE/build-support/pants.venv/BOOTSTRAPPED" ] || \
   source "$HERE/build-support/pants.venv/bin/activate"
   pip install -r "$PANTS_REQUIREMENTS"
   echo $PANTS_VERSION > "$HERE/build-support/pants.venv/BOOTSTRAPPED"
+  pushd $HERE
+  patch -p1 < local/pex_site_packages.diff
+  popd
 fi
 source "$HERE/build-support/pants.venv/bin/activate"
 exec pants "$@"

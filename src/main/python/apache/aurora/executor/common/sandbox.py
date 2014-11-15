@@ -118,6 +118,10 @@ class VolumeMountsDirectorySandbox(DirectorySandbox):
     if not chroot_location.startswith(root_location):
       raise self.CreationError('Could not bind mount %s as %s (not within root %s)' % (volume.hostLocation, chroot_location, root_location))
     try:
+      safe_mkdir(chroot_location)
+    except (IOError, OSError) as e:
+      raise self.CreationError('Failed to create the chroot location: %s, %s' % (chroot_location, e))
+    try:
       subprocess.check_call(['mount', '--bind', volume.hostLocation, chroot_location])
     except subprocess.CalledProcessError as e:
       raise self.CreationError('Could not bind mount %s as %s' % (volume.hostLocation, chroot_location))

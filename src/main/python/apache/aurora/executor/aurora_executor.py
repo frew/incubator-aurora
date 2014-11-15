@@ -24,7 +24,7 @@ from twitter.common.metrics import Observable
 from twitter.common.quantity import Amount, Time
 
 from .common.kill_manager import KillManager
-from .common.sandbox import DirectorySandbox, SandboxProvider
+from .common.sandbox import VolumeMountsDirectorySandbox, SandboxProvider
 from .common.status_checker import ChainedStatusChecker
 from .common.task_info import assigned_task_from_mesos_task
 from .common.task_runner import TaskError, TaskRunner, TaskRunnerProvider
@@ -36,9 +36,9 @@ class DefaultSandboxProvider(SandboxProvider):
   SANDBOX_NAME = 'sandbox'
 
   def from_assigned_task(self, assigned_task):
-    return DirectorySandbox(
-        os.path.realpath(self.SANDBOX_NAME),
-        assigned_task.task.job.role if assigned_task.task.job else assigned_task.task.owner.role)
+    sandbox_path = os.path.realpath(self.SANDBOX_NAME)
+    username = assigned_task.task.job.role if assigned_task.task.job else assigned_task.task.owner.role
+    return VolumeMountsDirectorySandbox(sandbox_path, username, assigned_task.task.volumes)
 
 
 class AuroraExecutor(ExecutorBase, Observable):

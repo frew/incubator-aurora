@@ -16,11 +16,16 @@ import getpass
 import grp
 import os
 import pwd
+import subprocess
 from abc import abstractmethod, abstractproperty
 
 from twitter.common import log
 from twitter.common.dirutil import safe_mkdir, safe_rmtree
 from twitter.common.lang import Interface
+
+from gen.apache.aurora.api.ttypes import (
+    MountType,
+  )
 
 
 class SandboxInterface(Interface):
@@ -101,3 +106,41 @@ class DirectorySandbox(SandboxInterface):
       safe_rmtree(self.root)
     except (IOError, OSError) as e:
       raise self.DeletionError('Failed to destroy sandbox: %s' % e)
+
+class VolumeMountsDirectorySandbox(DirectorySandbox):
+  def __init__(self, root, user=getpass.getuser(), volumes=[]):
+    super(VolumeMountsDirectorySandbox, self).__init__(root, user)
+    self._volumes = volumes
+
+  def _bind_mount(self, volume):
+    root_location = os.path.abspath(self.root)
+    chroot_location = os.path.abspath('%s%s' % (self.root, volume.chrootLocation))
+    if not chroot_location.startswith(root_location):
+      raise self.CreationError('Could not bind mount %s as %s (not within root %s)' % (volume.hostLocation, chroot_location, root_location))
+    try:
+      subprocess.check_call(['mount', '--bind', volume.hostLocation, chroot_location])
+    except subprocess.CalledProcessError as e:
+      raise self.CreationError('Could not bind mount %s as %s' % (volume.hostLocation, chroot_location)
+    if volume.mountType == MountType.RO:
+      try:
+        subprocess.check_call(['mount', '-o', 'remount,ro', chroot_location])
+      except subprocess.CalledProcessError as e:
+        raise self.CreationError('Could not rebind mount %s -> %s as read only' % (volume.hostLocation, chroot_location)
+
+  def _unmount(self, volume):
+    root_location = os.path.abspath(self.root)
+    chroot_location = os.path.abspath('%s%s' % (self.root, volume.chrootLocation))
+    try:
+      subprocess.check_call(['umount', chroot_location])
+    except subprocess.CalledProcessError as e:
+      raise self.DeletionError('Could not bind mount %s as %s' % (volume.hostLocation, chroot_location)
+
+  def create(self):
+    super(VolumeMountsDirectorySandbox, self).create()
+    for volume in self._volumes:
+      self._bind_mount(volume)
+
+  def destroy(self):
+    for volume in self._volumes:
+      self._unmount(volume)
+    super(VolumeMountsDirectorySandbox, self).destroy()

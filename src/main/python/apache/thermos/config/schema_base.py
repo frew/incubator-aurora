@@ -14,7 +14,7 @@
 
 # checkstyle: noqa
 
-from pystachio import Boolean, Default, Empty, Float, Integer, List, Map, Required, String, Struct
+from pystachio import Boolean, Default, Empty, Enum, Float, Integer, List, Map, Required, String, Struct
 
 # Define constants for resources
 BYTES = 1

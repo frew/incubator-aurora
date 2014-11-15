@@ -120,7 +120,7 @@ class VolumeMountsDirectorySandbox(DirectorySandbox):
     try:
       subprocess.check_call(['mount', '--bind', volume.hostLocation, chroot_location])
     except subprocess.CalledProcessError as e:
-      raise self.CreationError('Could not bind mount %s as %s' % (volume.hostLocation, chroot_location)
+      raise self.CreationError('Could not bind mount %s as %s' % (volume.hostLocation, chroot_location))
     if volume.mountType == MountType.RO:
       try:
         subprocess.check_call(['mount', '-o', 'remount,ro', chroot_location])
@@ -133,7 +133,7 @@ class VolumeMountsDirectorySandbox(DirectorySandbox):
     try:
       subprocess.check_call(['umount', chroot_location])
     except subprocess.CalledProcessError as e:
-      raise self.DeletionError('Could not bind mount %s as %s' % (volume.hostLocation, chroot_location)
+      raise self.DeletionError('Could not bind mount %s as %s' % (volume.hostLocation, chroot_location))
 
   def create(self):
     super(VolumeMountsDirectorySandbox, self).create()

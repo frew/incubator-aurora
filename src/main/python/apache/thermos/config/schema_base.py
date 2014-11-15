@@ -41,6 +41,12 @@ class Resources(Struct):
   disk = Required(Integer)
 
 
+class BindMount(Struct):
+  host_location = Required(String)
+  chroot_location = Required(String)
+  mount_type = Enum('RO', 'RW')
+
+
 class Constraint(Struct):
   order = List(String)
 
@@ -77,3 +83,5 @@ class Task(Struct):
 
   # TODO(jon): remove/replace with proper solution to MESOS-3546
   user = String
+
+  volumes = List(BindMount)

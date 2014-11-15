@@ -134,6 +134,17 @@ struct Metadata {
   2: string value
 }
 
+enum MountType {
+  RO = 0,
+  RW = 1,
+}
+
+struct BindMount {
+  1: string hostLocation
+  2: string chrootLocation
+  3: MountType mountType
+}
+
 /** A unique identifier for a Job. */
 struct JobKey {
   /** User role (Unix service account), for example "mesos" */
@@ -223,6 +234,7 @@ struct TaskConfig {
  25: optional ExecutorConfig executorConfig
  /** Used to display additional details in the UI. */
  27: optional set<Metadata> metadata
+ 29: set<BindMount> volumes
 }
 
 /** Defines the policy for launching a new cron job when one is already running. */

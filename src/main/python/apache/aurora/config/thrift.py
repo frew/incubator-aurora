@@ -23,6 +23,7 @@ from apache.thermos.config.loader import ThermosTaskValidator
 
 from gen.apache.aurora.api.constants import AURORA_EXECUTOR_NAME, GOOD_IDENTIFIER_PATTERN_PYTHON
 from gen.apache.aurora.api.ttypes import (
+    BindMount,
     Constraint,
     CronCollisionPolicy,
     ExecutorConfig,
@@ -31,6 +32,7 @@ from gen.apache.aurora.api.ttypes import (
     JobKey,
     LimitConstraint,
     Metadata,
+    MountType,
     TaskConfig,
     TaskConstraint,
     ValueConstraint
@@ -195,6 +197,21 @@ def convert(job, metadata=frozenset(), ports=frozenset()):
   if task.numCpus <= 0 or task.ramMb <= 0 or task.diskMb <= 0:
     raise InvalidConfig('Task has invalid resources.  cpu/ramMb/diskMb must all be positive: '
         'cpu:%r ramMb:%r diskMb:%r' % (task.numCpus, task.ramMb, task.diskMb))
+
+  mounts = []
+  for volume in task_raw.volumes():
+    mount = BindMount()
+    mount_type = fully_interpolated(volume.mount_type())
+    if str(mount_type) == 'RO':
+      mount.mountType = MountType.RO
+    elif str(mount_type) == 'RW':
+      mount.mountType = MountType.RW
+    else:
+      raise InvalidConfig('Found invalid mount type:%r' % volume.mount_type)
+    mount.hostLocation = fully_interpolated(volume.host_location())
+    mount.chrootLocation = fully_interpolated(volume.chroot_location())
+    mounts.append(mount)
+  task.volumes = mounts
 
   task.job = key
   task.owner = owner

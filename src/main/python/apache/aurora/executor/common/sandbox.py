@@ -125,7 +125,7 @@ class VolumeMountsDirectorySandbox(DirectorySandbox):
       try:
         subprocess.check_call(['mount', '-o', 'remount,ro', chroot_location])
       except subprocess.CalledProcessError as e:
-        raise self.CreationError('Could not rebind mount %s -> %s as read only' % (volume.hostLocation, chroot_location)
+        raise self.CreationError('Could not rebind mount %s -> %s as read only' % (volume.hostLocation, chroot_location))
 
   def _unmount(self, volume):
     root_location = os.path.abspath(self.root)

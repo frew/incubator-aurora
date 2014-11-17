@@ -139,6 +139,10 @@ class VolumeMountsDirectorySandbox(DirectorySandbox):
     except subprocess.CalledProcessError as e:
       raise self.DeletionError('Could not bind mount %s as %s' % (volume.hostLocation, chroot_location))
 
+  @property
+  def chrooted(self):
+    return True
+
   def create(self):
     super(VolumeMountsDirectorySandbox, self).create()
     for volume in self._volumes:
